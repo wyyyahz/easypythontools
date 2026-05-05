@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-agent
+
+# 开发环境配置
+logging:
+  level:
+    root: INFO
+    com.hiforce.order.center.ai.agent: DEBUG

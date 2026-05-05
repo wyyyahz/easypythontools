@@ -1,0 +1,62 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: ai-agent
+  
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  
+  # 禁用 JMX 以避免 RMI 连接问题
+  jmx:
+    enabled: false
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.hiforce.order.center.ai.agent: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# AI智能体配置
+ai-agent:
+  workflow:
+    # 最大并发工作流数量
+    max-concurrent-workflows: 10
+    # 工作流超时时间（毫秒）
+    timeout: 300000
+  engine:
+    # 文档理解引擎配置
+    understanding:
+      max-keywords: 10
+      max-summary-length: 200
+    # 文档检索引擎配置
+    retrieval:
+      max-results: 20
+      similarity-threshold: 0.6
+    # 信息抽取引擎配置
+    extraction:
+      confidence-threshold: 0.5
+    # 综合分析引擎配置
+    analysis:
+      quality-threshold: 0.6
+
+# 向量数据库配置
+vector-database:
+  # Milvus服务器地址
+  host: localhost
+  # Milvus服务器端口
+  port: 19530
+  # 集合名称
+  collection-name: document_vectors
+  # 向量维度
+  dimension: 768
+  # 是否启用向量数据库（false则跳过存储）
+  enabled: true
