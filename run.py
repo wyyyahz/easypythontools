@@ -13,8 +13,6 @@ def run(max_pages=None, city_id=5818, city_name="武汉",
 
     url = "https://www.agoda.cn/graphql/search"
 
-    # ✅ 更新点 1: Headers
-    # 从 copyAllAsCurl.txt 中提取的 GraphQL 请求 Headers
     headers = {
         'authority': 'www.agoda.cn',
         'accept': '*/*',
@@ -34,12 +32,9 @@ def run(max_pages=None, city_id=5818, city_name="武汉",
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
-        'x-gate-meta': 'MTc3ODA2MDgxODE4NHxlOGE5YzY3My04MDFiLTQ5YWMtYTVlZi0xYjU0ZDZiZWJkOGN8L2dyYXBocWwvc2VhcmNo' # 此值可能有时效性，若失效需重新抓包
+        'x-gate-meta': 'MTc3NzUzMDMyNzM0MXwyYjcwMDdiOS03MjNjLTRiNTMtYjI1NC1lNzkyMWRhNWJlN2R8L2dyYXBocWwvc2VhcmNo',
+        'cookie': 'agoda.user.03=UserId=2b7007b9-723c-4b53-b254-e7921da5be7d; agoda.prius=PriusID=0&PointsMaxTraffic=Agoda; deviceId=e5d88daa-1086-4da5-809b-dc871e0a4cc9; agoda.price.01=PriceView=2; _ab50group=GroupB; _40-40-20Split=Group40A; _ga=GA1.2.554060723.1777446395; _gid=GA1.2.1499314973.1777446395; t_rc=t=101&uid=2b7007b9-723c-4b53-b254-e7921da5be7d; ASP.NET_SessionId=v0wystgfneq53hxct4x13hpm; agoda.version.03=CookieId=ea778d33-7608-4df3-99da-f370532e231e&DLang=zh-cn&CurLabel=CNY&CuLang=8&CuCur=15'
     }
-
-    # ✅ 更新点 2: Cookie
-    # 从 copyAllAsCurl.txt 中提取的 Cookie (注意：Cookie 通常有过期时间，长期运行可能需要定期更新)
-    headers['cookie'] = 'agoda.user.03=UserId=e8a9c673-801b-49ac-a5ef-1b54d6bebd8c; agoda.prius=PriusID=0&PointsMaxTraffic=Agoda; ASP.NET_SessionId=2k0ml3ehasishfubyhzqwu1p; agoda.landings=-1|||2k0ml3ehasishfubyhzqwu1p|2026-05-06T13:33:04|False|19-----1|||2k0ml3ehasishfubyhzqwu1p|2026-05-06T13:33:04|False|20-----1|||2k0ml3ehasishfubyhzqwu1p|2026-05-06T13:33:04|False|99; agoda.attr.fe=-1|||2k0ml3ehasishfubyhzqwu1p|2026-05-06T13:33:04|False|2026-06-05T13:33:04|KJU5+IxJ/jMUUlRS; agoda.attr.03=ATItems=-1$05-06-2026 13:33$; deviceId=1138415b-6b0d-48b9-b01e-08ca2c7cb03f; agoda.price.01=PriceView=2; _ab50group=GroupB; _40-40-20Split=Group20; _ga=GA1.2.1891941631.1778049409; _gid=GA1.2.1341203801.1778049409; _uetsid=f74fcce0491511f1983a497a022e019c|1kgix47|2|g5t|0|2317; cto_bundle=HnPU719QRGNBOTNFQXBuJTJGJTJCRjhMRVVpMWowJTJCYzJROTZUUldSSW1hJTJGb0dHWmVqWUNTSVM0YUVmMkJxM0tDJTJGWnhhYzBLVEhjS3NaTXhWVUMxUG5JeHNreWVIeVpwUk10T1dpJTJGMSUyQjVOZGkxM1BVVHBXT2d1NGc1VkJLdEZ5dkZXa3pSbDZQZmtTaUdMMFI3YzVaJTJGeUxaREdFdjdRJTNEJTNE; _uetvid=f7500390491511f198e19731613a6860|ljd6lq|1778050087989|2|1|bat.bing.com/p/conversions/c/z; _ga_C07L4VP9DZ=GS2.2.s1778053830$o2$g0$t1778053830$j60$l0$h0; agoda.version.03=CookieId=a8e92362-e0b2-4153-a404-87f4013badd1&DLang=zh-cn&CurLabel=CNY&CuLang=8; agoda.search.01=SHist=1$9395$9256$1$1$2$0$0$$$|1$5818$9256$1$1$2$0$0$$$; agoda.consent=CN||2026-05-06 08:43:31Z; t_pp=XR/lV/DdDuQjDWet:Dy01FE7c6dqYZ4AeKx3/jg==:RWXzK/LOLVPfJfDOZlceoRWR4h3WEx/QIkgQJlVH4ZPWDHDwf1jjSVC2r8EIofzXgebKVt2Fo36LXeuiNFdOpLRNbJe/UGAj3UVnrtOtgH9e9DDlNING1XEUHEdiwzcwVhUiKA98UpSPzviCzgXFLWUsNZRReSBUjrGJ0C84AvB/TLYxPUf1VTnD5LB+M4f98XEPK6ArP+oUOBMT5h10EeBB/SrtGBtAcySKeZCfUjlNACFXIpS/nw==; utag_main=v_id:019dfbfdce5200170beb836a098a0506a001506200bd0$_sn:3$_se:1$_ss:1$_st:1778062602832$ses_id:1778060802832%3Bexp-session$_pn:1%3Bexp-session; __gads=ID=97be0ab7088fc6ec:T=1778049198:RT=1778060788:S=ALNI_MZcXos6Dq-OgrALXuaKB0zvJPZbxQ; __gpi=UID=000013f751ed1070:T=1778049198:RT=1778060788:S=ALNI_MaGyNCkaq7_hUWZht3bzUm9zLHdeg; agoda.analytics=Id=-2770737844507481522&Signature=6241372280871885581&Expiry=1778064387905; t_rc=dD03MSZ1aWQ9ZThhOWM2NzMtODAxYi00OWFjLWE1ZWYtMWI1NGQ2YmViZDhj.6RSooWokT/JIfQjY17sk3xpc4P4bBmSCw7d0OQZqrcA='
 
     checkin_date = datetime.strptime(checkin, "%Y-%m-%d")
     checkout_date = checkin_date + timedelta(days=los)
@@ -1006,7 +1001,7 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
 
     total_hotels = None
     consecutive_empty_pages = 0
-    max_consecutive_empty = 5
+    max_consecutive_empty = 30
 
     while True:
         if max_pages and current_page > max_pages:

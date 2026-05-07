@@ -1,68 +1,91 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Overview
 
-**Dual-purpose project**: a Java AI Agent workflow system (Spring Boot) + Python web scraping tools (Selenium). The Java side is a document intelligence pipeline; the Python side scrapes Agoda hotel data.
+**Dual-purpose project**: a Java AI Agent workflow system (Spring Boot 2.7.18, Java 8) + Python web scraping tools (Selenium/requests). The Java side is a rule-based document intelligence pipeline; the Python side scrapes Agoda hotel data. Output data (Excel, JSON, SQLite, screenshots) lives at the repo root and in `openclaw/`.
 
 ## Build & Run Commands (Java)
 
 ```bash
-# Compile and package
+# Compile and package → target/ai-agent.jar
 mvn clean package
 
-# Run (port 8080)
+# Run (port 8080): JAR or batch script
 java -jar target/ai-agent.jar
-# or: start.bat (runs mvn clean + mvn package -DskipTests then launches)
+./start.bat    # mvn clean → package -DskipTests → launch
 
 # Run all tests
 mvn test
 
-# Run a single test class (JUnit 4 style)
+# Single test (JUnit 4 style)
 mvn test -Dtest=DocumentIntelligenceTest
 
-# Run a single test method (JUnit 4)
+# Single test method (JUnit 4)
 mvn test -Dtest=DocumentIntelligenceTest#testProcessDocument
 
-# Run JUnit 5 tests (VectorDatabaseTest uses JUnit 5)
+# JUnit 5 tests (VectorDatabaseTest)
 mvn test -Dtest=VectorDatabaseTest
 
-# Skip tests during build
-mvn package -DskipTests
-
-# Use dev profile
+# Dev profile
 java -jar target/ai-agent.jar --spring.profiles.active=dev
 ```
 
-**Test mix**: `DocumentIntelligenceTest` uses JUnit 4 (`@RunWith(SpringRunner.class)`), `VectorDatabaseTest` uses JUnit 5 (`@Test` from `org.junit.jupiter.api`). Both are `@SpringBootTest`.
+**Test mix**: `DocumentIntelligenceTest` uses JUnit 4 (`@RunWith(SpringRunner.class)`), `VectorDatabaseTest` uses JUnit 5. Both are `@SpringBootTest`.
 
 ## Python Scripts
 
 ```bash
-# Install Python dependencies
-pip install requests selenium openpyxl pandas beautifulsoup4 lxml
+# Install Python deps (from requirements.txt or manually)
+pip install -r requirements.txt
+# Dependencies: requests, selenium, openpyxl, pandas, beautifulsoup4, lxml
 
-# Run a scraper (root level: 3 versions of Agoda scraper)
-python agoda_scraper.py
-python agoda_scraper_v2.py
-python agoda_scraper_v3.py
+# Unified entry point (orchestrates multiple strategies)
+python run.py
 
-# Run openclaw scraper (35+ scripts with different strategies)
+# Root-level scrapers (standalone versions)
+python agoda_scraper.py           # v1 Selenium (original)
+python agoda_scraper_v2.py        # v2
+python agoda_scraper_v3.py        # v3
+python agoda_scraper_v4.py        # v4
+python agoda_scraper_final.py     # Final comprehensive version
+python agoda_api_scraper.py       # API-based approach
+python agoda_cdp_scraper.py       # Chrome DevTools Protocol
+python agoda_js_scraper.py        # JavaScript injection
+
+# Debug utilities
+python debug_api.py               # Debug API requests
+python debug_network.py           # Network-level debugging
+python debug_session.py           # Session debugging
+
+# Openclaw scrapers (35+ scripts)
 python openclaw/full_scraper.py
 ```
 
 ### Python Scraping Strategies (openclaw/)
 
-The `openclaw/` directory contains a diverse set of scraping approaches for Agoda:
-- **CDP-based**: `cdp_capture.py`, `cdp_capture2.py`, `cdp_scraper.py` — Chrome DevTools Protocol for stealth
-- **Session-based**: `session2.py`, `session3.py`, `fresh_session.py`, `multi_session.py`, `multi_session_v2.py` — session management for avoiding detection
-- **Batch/API**: `batch_api.py`, `batch_scroll.py`, `batch_brackets_plan.py` — batch data collection
-- **Full scrapers**: `full_scraper.py` through `full_scraper_v4.py` — comprehensive implementations
-- **Data management**: `save_excel.py`, `save_hotels.py`, `merge_final.py`, `update_data.py`, `report.py` — output processing
-- **Agent system docs**: `AGENTS.md`, `HANDOVER.md`, `HEARTBEAT.md`, `IDENTITY.md`, `SOUL.md`, `TOOLS.md`, `USER.md`, `IMPLEMENTATION_GUIDE.md`, `SETUP_GUIDE.md`
+The `openclaw/` directory contains diverse scraping approaches for Agoda:
 
-Data storage: SQLite (`hotels.db`, `openclaw/*.db`) and Excel (`hotels_*.xlsx`). Uses ChromeDriver (`chromedriver.exe`) for browser automation.
+| Category | Scripts | Approach |
+|---|---|---|
+| **CDP-based** | `cdp_capture.py`, `cdp_capture2.py`, `cdp_scraper.py` | Chrome DevTools Protocol for stealth |
+| **Session-based** | `session2.py`, `session3.py`, `fresh_session.py`, `multi_session.py`, `multi_session_v2.py` | Session management to avoid detection |
+| **Batch/API** | `batch_api.py`, `batch_scroll.py`, `batch_brackets_plan.py` | Batch data collection |
+| **Full scrapers** | `full_scraper.py`–`full_scraper_v8.py`, `scrape_full_v6.py`–`v9.py`, `final_scraper.py`, `final_scrape.py`, `mass_scraper.py`, `scrape_agoda.py` | Comprehensive implementations |
+| **Data management** | `final_save.py`, `save_excel.py`, `save_hotels.py`, `merge_final.py`, `merge_final_excel.py`, `update_data.py`, `report.py` | Output processing and merging |
+| **Utilities** | `area_scraper.py`, `date_scraper.py`, `multi_sort.py`, `multi_sort2.py`, `run_paginate.py`, `quick_test.py`, `capture_api_request.py`, `capture_npc.py`, `capture_summary.py`, `test_api.py`, `test_body.py` | Support and analysis |
+| **Agent system** | `AGENTS.md`, `SOUL.md`, `USER.md`, `TOOLS.md`, `IDENTITY.md`, `HEARTBEAT.md`, `HANDOVER.md`, `IMPLEMENTATION_GUIDE.md`, `SETUP_GUIDE.md` | Meta-instructions for AI agents operating in this workspace |
+
+### Data Storage
+
+- **SQLite**: `hotels.db` (root), `openclaw/agoda_wuhan.db`
+- **Excel**: `hotels_*.xlsx` (root + openclaw, e.g. `agoda_wuhan_hotels_最终_2023条.xlsx`)
+- **JSON**: `hotels_all.json`, `hotels_all_final.json`, `hotels_data.json`
+- **HTML captures**: `agoda_homepage.html`, `agoda_search_result.html`, `agoda_overlay.html`, `page_debug.html`, `page_debug2.html`
+- **Screenshots**: `screenshots/`, `openclaw/ScreenShot_*.png`
+
+Uses `chromedriver.exe` (bundled) for Selenium-based browser automation.
 
 ## Java Architecture
 
@@ -153,3 +176,11 @@ com.hiforce.order.center.ai.agent
 - Logging via Logback (`logback.xml`): console + rolling file (30-day retention, 100MB per file) in `./logs/`
 - Lombok used extensively (`@Data`, `@Builder`, `@Slf4j`)
 - Utility libraries: `hutool-all 5.8.25`, `commons-lang3`, `commons-collections4`
+
+### Environment & Git
+
+- **OS**: Windows 11 (paths use `/` in bash, `\` in cmd — `.bat` scripts are Windows-native)
+- **Java build output**: `target/` (gitignored)
+- **ChromeDriver**: bundled at root as `chromedriver.exe`
+- **Output data directories** (gitignored): `导出数据/`, `导出数据_全部原始数据/`, `导出数据_完整版/`, `screenshots/`
+- **Claude session state**: `.claude/` (gitignored) — worktrees, memory, scheduled tasks
