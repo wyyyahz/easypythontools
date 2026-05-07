@@ -992,12 +992,16 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
     current_page = 1
     all_hotels = []
     seen_hotel_ids = set()
-    max_retries = 3
+    max_retries = 8
+    max_session_retries = 3
+    session_retry_count = 0
 
     print(f"🚀 开始抓取 Agoda {city_name} 酒店数据...")
     print(f"📅 入住日期: {checkin}, 入住 {los} 晚, {adults} 位成人")
     print(f"📊 每页数量: {page_size}")
+    print(f"⏳ 等待 15 秒启动，避免触发限流...")
     print("=" * 60)
+    time.sleep(15)
 
     total_hotels = None
     consecutive_empty_pages = 0
@@ -1283,8 +1287,15 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
                 print(f"   📡 响应状态码: {response.status_code}")
 
                 if response.status_code == 429:
-                    print(f"   ⚠️ 请求过于频繁，等待 10 秒后重试...")
-                    time.sleep(10)
+                    wait = min(30, 10 * (retry + 1))
+                    print(f"   ⚠️ 请求过于频繁，等待 {wait} 秒后重试...")
+                    time.sleep(wait)
+                    continue
+
+                if response.status_code == 502:
+                    wait = min(60, 5 * (retry + 1))
+                    print(f"   ⚠️ 服务器错误 (502)，等待 {wait} 秒后重试 ({retry+1}/{max_retries})...")
+                    time.sleep(wait)
                     continue
 
                 if response.status_code != 200:
@@ -1313,8 +1324,16 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
                 break
 
         if data is None:
-            print(f"❌ 第 {current_page} 页请求失败，停止抓取")
-            break
+            # 尝试重建搜索会话
+            if session_retry_count < max_session_retries:
+                session_retry_count += 1
+                search_id = str(uuid.uuid4())
+                print(f"⚠️ 搜索会话可能已过期，重建新会话 (第 {session_retry_count}/{max_session_retries} 次)...")
+                time.sleep(10)
+                continue  # 重新从当前页开始
+            else:
+                print(f"❌ 第 {current_page} 页请求失败，会话重建已达上限 ({max_session_retries})，停止抓取")
+                break
 
         city_search = data.get("data", {}).get("citySearch", {})
 
@@ -1455,6 +1474,13 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
             percentage = len(all_hotels) / total_hotels * 100
             print(f"   📊 进度: {len(all_hotels)}/{total_hotels} ({percentage:.2f}%)")
 
+        # 每 10 页中间保存一次
+        if current_page % 10 == 0:
+            df_temp = pd.DataFrame(all_hotels)
+            temp_filename = f"Agoda_{city_name}_酒店_{checkin}_临时.xlsx"
+            df_temp.to_excel(temp_filename, index=False, engine='openpyxl')
+            print(f"   💾 中间保存: {len(df_temp)} 条 -> {temp_filename}")
+
         # 检查是否完成
         if total_hotels and len(all_hotels) >= total_hotels:
             print(f"🏁 已抓取所有 {total_hotels} 家酒店")
@@ -1464,23 +1490,22 @@ fragment Fragiadej55h86afai6hji2a on ContentIdName {
         search_enrichment = city_search.get("searchEnrichment", {})
         next_page_token = search_enrichment.get("pageToken", "")
 
-        # 判断是否还有下一页
-        if not next_page_token:
-            print("🏁 没有更多分页数据 (pageToken 为空)")
-            break
-
-        if next_page_token == page_token:
-            # pageToken 相同，可能需要使用 pageNumber 递增
-            print(f"   ⚠️ pageToken 未变化，尝试使用 pageNumber 分页")
-            # 继续使用 pageNumber 递增
-        else:
+        if next_page_token and next_page_token != page_token:
+            # 有效的新 token，继续使用 token 分页
             print(f"   🔑 新 pageToken: {next_page_token[:30]}...")
+            page_token = next_page_token
+        else:
+            # pageToken 为空或未变化，切回 pageNumber 分页
+            if not next_page_token:
+                print(f"   ⚠️ pageToken 为空，切换为 pageNumber 分页模式")
+            else:
+                print(f"   ⚠️ pageToken 未变化，切换为 pageNumber 分页模式")
+            page_token = ""  # 清空 token 以使用 pageNumber
 
-        page_token = next_page_token
         current_page += 1
 
-        # 添加延迟
-        time.sleep(1.5)
+        # 添加延迟 - 长间隔避免触发限流
+        time.sleep(3)
 
     # 保存结果
     if all_hotels:
@@ -1523,7 +1548,7 @@ if __name__ == '__main__':
         max_pages=None,
         city_id=5818,
         city_name="武汉",
-        checkin="2026-06-01",
+        checkin="2026-06-05",
         los=1,
         adults=2,
         page_size=25
