@@ -3,7 +3,8 @@
 """
 Full Agoda scraper using the EXACT API body captured from the browser.
 """
-import json, os, time, sys, sqlite3
+
+import json,  os, time, sys, sqlite3
 sys.stdout.reconfigure(encoding='utf-8')
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
