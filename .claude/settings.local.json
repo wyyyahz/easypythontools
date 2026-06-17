@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(mvn test *)",
-      "Bash(pip install *)"
+      "Bash(pip install *)",
+      "Bash(python debug_dom.py)",
+      "Bash(timeout 420 python test_scroll_all.py)",
+      "Bash(timeout 120 python test_wait.py)",
+      "Bash(python test_card_html.py)",
+      "Bash(python test_price_section.py)",
+      "Bash(python test_page_state.py)",
+      "Bash(python run.py)",
+      "Bash(python test_price_filter.py)",
+      "Bash(timeout 300 python test_extract_all.py)",
+      "Bash(python test_filters.py)"
     ]
   }
 }
